@@ -1,15 +1,21 @@
+/* 	
+*	Dakota sanchez
+*	26 April 2014
+*	
+*	Subreddit Wallpaper mass downloader 
+*/
+
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.io.File;
 import javax.imageio.ImageIO;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -22,6 +28,7 @@ public class Wall {
 	private String xmlUrl;
 	private String path;
 
+	// for xml elements
 	private Elements hashes;
 	private Elements exts;
 	private Elements widths;
@@ -35,11 +42,15 @@ public class Wall {
 		fc.setDialogTitle("Please choose a directory for download");
 		int returnVal = fc.showOpenDialog(null);
 
+		// exit if no directory chosen
 		if(returnVal == 1) { System.exit(0); }
 
+		// get path chosen and grab the last char
 		String path = fc.getSelectedFile().getPath();
 		char end = path.charAt(path.length() - 1);
 
+		// check os for correct path delimiter
+		// then append one if it's not there
 		if((System.getProperty("os.name")).startsWith("Windows")) {
 			if(end != '\\')
 				path += "\\";
@@ -48,8 +59,7 @@ public class Wall {
 				path += "/";
 		}
 
-		System.out.println(path);
-
+		// popular subreddits for wallpapers
 		String[] subs = {"space", "earth", "sky", "animal", "winter",
 						 "city", "adrenaline", "food", "map", "history"};
 		String sub = (String)JOptionPane.showInputDialog(
@@ -61,7 +71,9 @@ public class Wall {
 							subs,
 							"space");
 
+		// append for coreect url
 		if(sub != null) { sub = sub + "porn"; }
+		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
 		Wall wall = new Wall(sub, path);
@@ -80,6 +92,7 @@ public class Wall {
 		try {
 			doc = Jsoup.connect(xmlUrl).get();
 
+			// get elements for the following tags
 			hashes = doc.select("hash");
 			exts = doc.select("ext");
 			widths = doc.select("width");
@@ -97,21 +110,24 @@ public class Wall {
 
 	public void getImages() {
 		try {
+			// for every image referenced in the XML
 			for(int i = 0; i < hashes.size(); i++) {
 				int width = Integer.parseInt(widths.get(i).ownText());
 				int height = Integer.parseInt(heights.get(i).ownText());
+
+				// only download images that meet the min. resolution
 				if((width >= 1366) || (height >= 768)) {
+					// 7-char hash associated with image
 					String hash = hashes.get(i).ownText();
+					// file extension
 					String ext = exts.get(i).ownText();
-
+					// url image is located at
 					URL url = new URL(imgur_image_url + hash + ext);
-
+					// download image and convert for save
 					Image image = ImageIO.read(url);
-
-					File outputfile = new File(path + hash + ext);
-
 					BufferedImage img = toBufferedImage(image);
-
+					// create output file and write image
+					File outputfile = new File(path + hash + ext);
 					ImageIO.write(img, ext.substring(1), outputfile);
 				}
 			}
@@ -129,7 +145,6 @@ public class Wall {
 	    if (img instanceof BufferedImage) {
 	        return (BufferedImage) img;
 	    }
-
 	    // create a buffered image with transparency
 	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
