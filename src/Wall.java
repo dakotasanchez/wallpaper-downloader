@@ -1,4 +1,5 @@
 import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -27,9 +28,27 @@ public class Wall {
 	private Elements heights;
 
 	public static void main(String[] args) {
-		String windowsEx = "Windows: C:\\Users\\Bob\\Pictures\\\n";
-		String macEx = "Mac: /Users/bob/Pictures/\n";
-		String linuxEx = "Linux: /home/bob/Pictures/\n";
+
+		// create directory chooser for download
+		JFileChooser fc = new JFileChooser();
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fc.setDialogTitle("Please choose a directory for download");
+		int returnVal = fc.showOpenDialog(null);
+
+		if(returnVal == 1) { System.exit(0); }
+
+		String path = fc.getSelectedFile().getPath();
+		char end = path.charAt(path.length() - 1);
+
+		if((System.getProperty("os.name")).startsWith("Windows")) {
+			if(end != '\\')
+				path += "\\";
+		} else {
+			if(end != '/')
+				path += "/";
+		}
+
+		System.out.println(path);
 
 		String[] subs = {"space", "earth", "sky", "animal", "winter",
 						 "city", "adrenaline", "food", "map", "history"};
@@ -44,25 +63,6 @@ public class Wall {
 
 		if(sub != null) { sub = sub + "porn"; }
 		if(sub == null) { System.exit(0); }
-
-		String path = (String)JOptionPane.showInputDialog(
-							null,
-							"Enter path to download folder:\n\ne.g.\n" + 
-								windowsEx + macEx + linuxEx + "\n",
-							"Path",
-							JOptionPane.PLAIN_MESSAGE,
-							null,
-							null,
-							null);
-
-		if(path == null || path.length() < 1) {
-			JOptionPane.showMessageDialog(
-				null,
-				"No path specified",
-				"Error",
-				JOptionPane.ERROR_MESSAGE);
-			System.exit(0);
-		}
 
 		Wall wall = new Wall(sub, path);
 
