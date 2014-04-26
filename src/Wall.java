@@ -128,7 +128,10 @@ public class Wall {
 					BufferedImage img = toBufferedImage(image);
 					// create output file and write image
 					File outputfile = new File(path + hash + ext);
-					ImageIO.write(img, ext.substring(1), outputfile);
+					// don't overwrite if it already exists
+					if(!outputfile.exists()) {
+						ImageIO.write(img, ext.substring(1), outputfile);
+					}
 				}
 			}
 		} catch (Exception e) {
