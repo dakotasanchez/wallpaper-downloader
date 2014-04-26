@@ -24,6 +24,7 @@ public class Wall {
 	private Elements hashes;
 	private Elements exts;
 	private Elements widths;
+	private Elements heights;
 
 	public static void main(String[] args) {
 		String windowsEx = "Windows: C:\\Users\\Bob\\Pictures\\\n";
@@ -62,7 +63,7 @@ public class Wall {
 				JOptionPane.ERROR_MESSAGE);
 			System.exit(0);
 		}
-		
+
 		Wall wall = new Wall(sub, path);
 
 		wall.getXMLPage();
@@ -82,6 +83,7 @@ public class Wall {
 			hashes = doc.select("hash");
 			exts = doc.select("ext");
 			widths = doc.select("width");
+			heights = doc.select("height");
 
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(
@@ -97,7 +99,8 @@ public class Wall {
 		try {
 			for(int i = 0; i < hashes.size(); i++) {
 				int width = Integer.parseInt(widths.get(i).ownText());
-				if(width > 1366) {
+				int height = Integer.parseInt(heights.get(i).ownText());
+				if((width >= 1366) || (height >= 768)) {
 					String hash = hashes.get(i).ownText();
 					String ext = exts.get(i).ownText();
 
