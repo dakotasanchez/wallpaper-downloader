@@ -22,8 +22,7 @@ import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
 
 public class Wall {
-	private final String imgur_url = "http://www.imgur.com/r/";
-	private final String imgur_image_url = "http://www.i.imgur.com/";
+	private final String imgur_url = "http://www.imgur.com/";
 
 	private String xmlUrl;
 	private String path;
@@ -72,7 +71,7 @@ public class Wall {
 							"space");
 
 		// append for coreect url
-		if(sub != null) { sub = sub + "porn"; }
+		if(sub != null) { sub = "r/" + sub + "porn"; }
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
@@ -104,7 +103,7 @@ public class Wall {
 				"Error retrieving page",
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
-			System.out.println(e.toString());
+			e.printStackTrace();
 			System.exit(0);
 		}
 	}
@@ -123,7 +122,7 @@ public class Wall {
 					// file extension
 					String ext = exts.get(i).ownText();
 					// url image is located at
-					URL url = new URL(imgur_image_url + hash + ext);
+					URL url = new URL(imgur_url + hash + ext);
 					// download image and convert for save
 					Image image = ImageIO.read(url);
 					BufferedImage img = toBufferedImage(image);
@@ -141,7 +140,7 @@ public class Wall {
 				"Error retrieving Images",
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
-			System.out.println(e.toString());
+			e.printStackTrace();
 			System.exit(0);
 		}
 	}
