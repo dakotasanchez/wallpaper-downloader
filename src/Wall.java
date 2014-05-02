@@ -104,6 +104,7 @@ public class Wall {
 				"Error retrieving page",
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
+			System.out.println(e.toString());
 			System.exit(0);
 		}
 	}
@@ -116,7 +117,7 @@ public class Wall {
 				int height = Integer.parseInt(heights.get(i).ownText());
 
 				// only download images that meet the min. resolution
-				if((width >= 1366) || (height >= 768)) {
+				if((width >= 1920) || (height >= 1080)) {
 					// 7-char hash associated with image
 					String hash = hashes.get(i).ownText();
 					// file extension
@@ -140,6 +141,7 @@ public class Wall {
 				"Error retrieving Images",
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
+			System.out.println(e.toString());
 			System.exit(0);
 		}
 	}
