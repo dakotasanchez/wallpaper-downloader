@@ -23,9 +23,11 @@ import java.awt.Graphics2D;
 
 public class Wall {
 	private final String imgur_url = "http://www.imgur.com/";
+    private final String imgur_extension = "new/day/page/";
 
 	private String xmlUrl;
 	private String path;
+    private int page;
 
 	// for xml elements
 	private Elements hashes;
@@ -71,7 +73,7 @@ public class Wall {
 							"space");
 
 		// append for coreect url
-		if(sub != null) { sub = "r/" + sub + "porn"; }
+		if(sub != null) { sub = "r/" + sub + "porn/"; }
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
@@ -83,7 +85,8 @@ public class Wall {
 
 	public Wall(String sub, String path) {
 		this.path = path;
-		xmlUrl = imgur_url + sub + ".xml";
+        page = 0;
+		xmlUrl = imgur_url + sub + imgur_extension + page + ".xml";
 	}
 
 	public void getXMLPage() {
