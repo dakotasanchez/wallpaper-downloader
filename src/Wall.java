@@ -7,6 +7,8 @@
 
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 import java.net.URL;
 import java.io.File;
@@ -28,6 +30,8 @@ public class Wall {
 	private String xmlUrl;
 	private String path;
     private int page;
+    private int imageCount;
+    private int imageLimit;
 
 	// for xml elements
 	private Elements hashes;
@@ -36,6 +40,20 @@ public class Wall {
 	private Elements heights;
 
 	public static void main(String[] args) {
+		setLAF();
+
+		Integer[] limits = new Integer[100];
+		for(int i = 0; i < limits.length; i++) { limits[i] = i + 1; }
+		Integer imageLimit = (Integer)JOptionPane.showInputDialog(
+								null,
+								"Choose number of images\nto be downloaded:",
+								"",
+								JOptionPane.PLAIN_MESSAGE,
+								null,
+								limits,
+								"1");
+		
+		if(imageLimit == null) { System.exit(0); }
 
 		// create directory chooser for download
 		JFileChooser fc = new JFileChooser();
@@ -65,8 +83,8 @@ public class Wall {
 						 "city", "adrenaline", "food", "map", "history"};
 		String sub = (String)JOptionPane.showInputDialog(
 							null,
-							"Enter desired image subreddit:",
-							"Reddit image downloader",
+							"Choose desired image category:",
+							"Imgur image downloader",
 							JOptionPane.PLAIN_MESSAGE,
 							null,
 							subs,
@@ -77,22 +95,38 @@ public class Wall {
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
-		Wall wall = new Wall(sub, path);
+		Wall wall = new Wall(sub, path, imageLimit);
 
-		wall.getXMLPage();
+		wall.updateXMLPage();
 		wall.getImages();
 	}
 
-	public Wall(String sub, String path) {
-		this.path = path;
-        page = 0;
-		xmlUrl = imgur_url + sub + imgur_extension + page + ".xml";
+	// change Look & Feel of user interface
+	public static void setLAF() {
+		try{
+			for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+		        if("Nimbus".equals(info.getName())) {
+		            UIManager.setLookAndFeel(info.getClassName());
+		            break;
+		        }
+		    }
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void getXMLPage() {
+	public Wall(String sub, String path, int imageLimit) {
+		this.path = path;
+		this.imageLimit = imageLimit;
+		imageCount = 0;
+        page = 0;
+		xmlUrl = imgur_url + sub + imgur_extension;
+	}
+
+	public void updateXMLPage() {
 		Document doc;
 		try {
-			doc = Jsoup.connect(xmlUrl).get();
+			doc = Jsoup.connect(xmlUrl + page + ".xml").get();
 
 			// get elements for the following tags
 			hashes = doc.select("hash");
@@ -113,29 +147,35 @@ public class Wall {
 
 	public void getImages() {
 		try {
-			// for every image referenced in the XML
-			for(int i = 0; i < hashes.size(); i++) {
-				int width = Integer.parseInt(widths.get(i).ownText());
-				int height = Integer.parseInt(heights.get(i).ownText());
+			while(imageCount < imageLimit) {
+				// for every image referenced in the XML
+				for(int i = 0; i < hashes.size(); i++) {
+					int width = Integer.parseInt(widths.get(i).ownText());
+					int height = Integer.parseInt(heights.get(i).ownText());
 
-				// only download images that meet the min. resolution
-				if((width >= 1920) || (height >= 1080)) {
-					// 7-char hash associated with image
-					String hash = hashes.get(i).ownText();
-					// file extension
-					String ext = exts.get(i).ownText();
-					// url image is located at
-					URL url = new URL(imgur_url + hash + ext);
-					// download image and convert for save
-					Image image = ImageIO.read(url);
-					BufferedImage img = toBufferedImage(image);
-					// create output file and write image
-					File outputfile = new File(path + hash + ext);
-					// don't overwrite if it already exists
-					if(!outputfile.exists()) {
-						ImageIO.write(img, ext.substring(1), outputfile);
+					// only download images that meet the min. resolution
+					if((width >= 1920) || (height >= 1080)) {
+						// 7-char hash associated with image
+						String hash = hashes.get(i).ownText();
+						// file extension
+						String ext = exts.get(i).ownText();
+						// url image is located at
+						URL url = new URL(imgur_url + hash + ext);
+						// download image and convert for save
+						Image image = ImageIO.read(url);
+						BufferedImage img = toBufferedImage(image);
+						// create output file and write image
+						File outputfile = new File(path + hash + ext);
+						// don't overwrite if it already exists
+						if(!outputfile.exists()) {
+							ImageIO.write(img, ext.substring(1), outputfile);
+							imageCount++;
+						}
 					}
+					if (imageCount >= imageLimit) break;						
 				}
+				page++;
+				updateXMLPage();
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(
