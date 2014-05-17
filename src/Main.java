@@ -12,7 +12,8 @@ import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.JProgressBar;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class Main {
 
@@ -38,7 +39,8 @@ public class Main {
 
 		// popular subreddits for wallpapers
 		String[] subs = {"space", "earth", "sky", "animal", "winter",
-						 "city", "adrenaline", "food", "map", "history"};
+						 "city", "history", "food", "map", "adrenaline",
+						 "destruction", "village" };
 		String sub = (String)JOptionPane.showInputDialog(
 							null,
 							"Choose desired image category:",
@@ -48,8 +50,6 @@ public class Main {
 							subs,
 							"space");
 
-		// append for coreect url
-		if(sub != null) { sub = "r/" + sub + "porn/"; }
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
@@ -79,10 +79,20 @@ public class Main {
 		// set up progress bar and offload to thread
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle("Downloading...");
-		frame.setSize(400, 50);
+		frame.setSize(400, 80);
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
+		frame.setContentPane(new JPanel());
+
+		String labelStr = "Getting " + imageLimit + " newest ";
+		if(imageLimit == 1) 
+			labelStr += "image ";
+		else
+			labelStr += "images ";
+
+		labelStr += "from " + sub + " wallpaper source";
+
+		frame.getContentPane().add(new JLabel(labelStr));
 		
 		pb = new JProgressBar();
 		frame.getContentPane().add(pb);
@@ -92,6 +102,10 @@ public class Main {
 
 		frame.setVisible(true);
 
+		// append for correct url
+		sub = "r/" + sub + "porn/";
+
+		// start downloading
 		new Wall(sub, path, imageLimit, pbu);
 	}
 
