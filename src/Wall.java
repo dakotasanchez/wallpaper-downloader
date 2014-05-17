@@ -7,6 +7,8 @@
 
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
+import javax.swing.JProgressBar;
+import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -38,6 +40,12 @@ public class Wall {
 	private Elements exts;
 	private Elements widths;
 	private Elements heights;
+
+	private ProgressBarUpdater pbu;
+	private JFrame frame;
+	private JProgressBar pb;
+
+	private Thread t;
 
 	public static void main(String[] args) {
 		setLAF();
@@ -121,6 +129,23 @@ public class Wall {
 		imageCount = 0;
         page = 0;
 		xmlUrl = imgur_url + sub + imgur_extension;
+
+		// set up progress bar and offload to thread
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setTitle("Downloading...");
+		frame.setSize(300, 50);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
+		
+		pb = new JProgressBar();
+		frame.getContentPane().add(pb);
+
+		pbu = new ProgressBarUpdater(pb);
+		t = new Thread(pbu);
+		t.start();
+
+		frame.setVisible(true);
 	}
 
 	public void updateXMLPage() {
@@ -170,6 +195,8 @@ public class Wall {
 						if(!outputfile.exists()) {
 							ImageIO.write(img, ext.substring(1), outputfile);
 							imageCount++;
+							Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
+							pbu.setValue(barValue);
 						}
 					}
 					if (imageCount >= imageLimit) break;						
@@ -177,6 +204,9 @@ public class Wall {
 				page++;
 				updateXMLPage();
 			}
+
+			frame.dispose();
+			System.exit(0);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(
 				null,
