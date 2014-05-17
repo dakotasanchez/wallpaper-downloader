@@ -15,7 +15,7 @@ public class Main {
 	public static void main(String[] args) {
 		setLAF();
 
-		Integer[] limits = new Integer[100];
+		Integer[] limits = new Integer[200];
 		for(int i = 0; i < limits.length; i++) { limits[i] = i + 1; }
 		Integer imageLimit = (Integer)JOptionPane.showInputDialog(
 								null,

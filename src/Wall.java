@@ -14,6 +14,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 import org.jsoup.Jsoup;
+import org.jsoup.helper.HttpConnection;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
@@ -55,7 +56,7 @@ public class Wall {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setTitle("Downloading...");
-		frame.setSize(300, 50);
+		frame.setSize(400, 50);
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
 		
@@ -72,7 +73,11 @@ public class Wall {
 	public void updateXMLPage() {
 		Document doc;
 		try {
-			doc = Jsoup.connect(xmlUrl + page + ".xml").get();
+			System.out.println(xmlUrl + page + ".xml");
+			// doc = Jsoup.connect(xmlUrl + page + ".xml").get();
+			HttpConnection c = (HttpConnection)Jsoup.connect(xmlUrl + page + ".xml");
+			c.timeout(10000);
+			doc = c.get();
 
 			// get elements for the following tags
 			hashes = doc.select("hash");
@@ -86,7 +91,9 @@ public class Wall {
 				"Error retrieving page",
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
+			
 			e.printStackTrace();
+			//updateXMLPage();
 			System.exit(0);
 		}
 	}
