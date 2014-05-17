@@ -5,10 +5,6 @@
 *	Imgur wallpaper mass downloader 
 */
 
-import javax.swing.JProgressBar;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-
 import java.net.URL;
 import java.io.File;
 import javax.imageio.ImageIO;
@@ -22,6 +18,8 @@ import org.jsoup.nodes.Element;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
+
+import javax.swing.JOptionPane;
 
 public class Wall {
 	private final String imgur_url = "http://www.imgur.com/";
@@ -39,35 +37,19 @@ public class Wall {
 	private Elements widths;
 	private Elements heights;
 
-	private ProgressBarUpdater pbu;
-	private JFrame frame;
-	private JProgressBar pb;
+	private static ProgressBarUpdater pbu;
 
-	private Thread t;
-
-	public Wall(String sub, String path, int imageLimit) {
+	public Wall(String sub, String path, int imageLimit, ProgressBarUpdater pbu) {
 		this.path = path;
 		this.imageLimit = imageLimit;
 		imageCount = 0;
         page = 0;
+
+        this.pbu = pbu;
 		xmlUrl = imgur_url + sub + imgur_extension;
 
-		// set up progress bar and offload to thread
-		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setTitle("Downloading...");
-		frame.setSize(400, 50);
-		frame.setLocationRelativeTo(null);
-		frame.setResizable(false);
-		
-		pb = new JProgressBar();
-		frame.getContentPane().add(pb);
-
-		pbu = new ProgressBarUpdater(pb);
-		t = new Thread(pbu);
-		t.start();
-
-		frame.setVisible(true);
+		updateXMLPage();
+		getImages();
 	}
 
 	public void updateXMLPage() {
@@ -76,6 +58,7 @@ public class Wall {
 			System.out.println(xmlUrl + page + ".xml");
 			// doc = Jsoup.connect(xmlUrl + page + ".xml").get();
 			HttpConnection c = (HttpConnection)Jsoup.connect(xmlUrl + page + ".xml");
+			// 10 second timeout
 			c.timeout(10000);
 			doc = c.get();
 
@@ -86,15 +69,7 @@ public class Wall {
 			heights = doc.select("height");
 
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(
-				null,
-				"Error retrieving page",
-				"Error",
-				JOptionPane.ERROR_MESSAGE);
-			
-			e.printStackTrace();
-			//updateXMLPage();
-			System.exit(0);
+			showError("Error retrieving page", e);
 		}
 	}
 
@@ -129,7 +104,6 @@ public class Wall {
 					}
 					if (imageCount >= imageLimit) {
 						Thread.sleep(500);
-						frame.dispose();
 						System.exit(0);
 					}						
 				}
@@ -137,13 +111,7 @@ public class Wall {
 				updateXMLPage();
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(
-				null,
-				"Error retrieving Images",
-				"Error",
-				JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace();
-			System.exit(0);
+			showError("Error retrieving images", e);
 		}
 	}
 
@@ -161,5 +129,15 @@ public class Wall {
 
 	    // return the buffered image
 	    return bimage;
+	}
+
+	public void showError(String message, Exception e) {
+		JOptionPane.showMessageDialog(
+				null,
+				message,
+				"Error",
+				JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
+			System.exit(0);
 	}
 }

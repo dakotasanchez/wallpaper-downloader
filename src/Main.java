@@ -9,8 +9,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.JProgressBar;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 
 public class Main {
+
+	private static ProgressBarUpdater pbu;
+	private static JFrame frame;
+	private static JProgressBar pb;
 
 	public static void main(String[] args) {
 		setLAF();
@@ -27,6 +35,23 @@ public class Main {
 								"1");
 		
 		if(imageLimit == null) { System.exit(0); }
+
+		// popular subreddits for wallpapers
+		String[] subs = {"space", "earth", "sky", "animal", "winter",
+						 "city", "adrenaline", "food", "map", "history"};
+		String sub = (String)JOptionPane.showInputDialog(
+							null,
+							"Choose desired image category:",
+							"Imgur image downloader",
+							JOptionPane.PLAIN_MESSAGE,
+							null,
+							subs,
+							"space");
+
+		// append for coreect url
+		if(sub != null) { sub = "r/" + sub + "porn/"; }
+		// if none selected then exit
+		if(sub == null) { System.exit(0); }
 
 		// create directory chooser for download
 		JFileChooser fc = new JFileChooser();
@@ -51,27 +76,23 @@ public class Main {
 				path += "/";
 		}
 
-		// popular subreddits for wallpapers
-		String[] subs = {"space", "earth", "sky", "animal", "winter",
-						 "city", "adrenaline", "food", "map", "history"};
-		String sub = (String)JOptionPane.showInputDialog(
-							null,
-							"Choose desired image category:",
-							"Imgur image downloader",
-							JOptionPane.PLAIN_MESSAGE,
-							null,
-							subs,
-							"space");
+		// set up progress bar and offload to thread
+		frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setTitle("Downloading...");
+		frame.setSize(400, 50);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);
+		
+		pb = new JProgressBar();
+		frame.getContentPane().add(pb);
 
-		// append for coreect url
-		if(sub != null) { sub = "r/" + sub + "porn/"; }
-		// if none selected then exit
-		if(sub == null) { System.exit(0); }
+		pbu = new ProgressBarUpdater(pb);
+		new Thread(pbu).start();
 
-		Wall wall = new Wall(sub, path, imageLimit);
+		frame.setVisible(true);
 
-		wall.updateXMLPage();
-		wall.getImages();
+		new Wall(sub, path, imageLimit, pbu);
 	}
 
 	// change Look & Feel of user interface
