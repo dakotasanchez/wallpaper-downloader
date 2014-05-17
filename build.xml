@@ -35,7 +35,7 @@
       <zipgroupfileset dir="${lib}" includes="jsoup-1.7.3.jar" />
       <manifest>
         <attribute name="Wall-${DSTAMP}" value="main"/>
-        <attribute name="Main-Class" value="Wall"/>
+        <attribute name="Main-Class" value="Main"/>
       </manifest>
     </jar>
   </target>
