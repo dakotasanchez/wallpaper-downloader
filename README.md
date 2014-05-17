@@ -1,7 +1,7 @@
 wallpaper-downloader
 ====================
 
-Subreddit wallpaper mass downloader
+Imgur wallpaper mass downloader
 
 Setup
 =====
