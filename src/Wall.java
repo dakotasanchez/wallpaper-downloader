@@ -8,6 +8,7 @@
 import java.net.URL;
 import java.io.File;
 import javax.imageio.ImageIO;
+import javax.imageio.IIOException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.HttpConnection;
@@ -30,7 +31,8 @@ public class Wall {
     private int page;
     private int imageCount;
     private int imageLimit;
-    private int errorCount;
+    private int pageErrorCount;
+    private int imageErrorCount;
 
 	// for xml elements
 	private Elements hashes;
@@ -44,7 +46,8 @@ public class Wall {
 		this.path = path;
 		this.imageLimit = imageLimit;
 
-		errorCount = 0;
+		imageErrorCount = 0;
+		pageErrorCount = 0;
 		imageCount = 0;
         page = 0;
 
@@ -62,7 +65,7 @@ public class Wall {
 			// 10 second timeout
 			c.timeout(10000);
 			doc = c.get();
-			errorCount = 0;
+			pageErrorCount = 0;
 
 			// get elements for the following tags
 			hashes = doc.select("hash");
@@ -71,10 +74,9 @@ public class Wall {
 			heights = doc.select("height");
 
 		} catch (Exception e) {
-			errorCount++;
-			if (errorCount >= 3) {
+			pageErrorCount++;
+			if (pageErrorCount >= 3) {
 				showError("Error retrieving page", e);
-				System.exit(0);
 			}
 			updateXMLPage();
 		}
@@ -96,8 +98,21 @@ public class Wall {
 						String ext = exts.get(i).ownText();
 						// url image is located at
 						URL url = new URL(imgur_url + hash + ext);
+
 						// download image and convert for save
-						Image image = ImageIO.read(url);
+						Image image;
+						try {
+							image = ImageIO.read(url);
+							// reset error count
+							imageErrorCount = 0;
+						} catch (IIOException e1) {
+							imageErrorCount++;
+							if (imageErrorCount >= 3) {
+								showError("Error retrieving images", e1);
+							}
+							continue;
+						}
+
 						BufferedImage img = toBufferedImage(image);
 						// create output file and write image
 						File outputfile = new File(path + hash + ext);
@@ -117,8 +132,8 @@ public class Wall {
 				page++;
 				updateXMLPage();
 			}
-		} catch (Exception e) {
-			showError("Error retrieving images", e);
+		} catch (Exception e2) {
+			e2.printStackTrace();
 		}
 	}
 
