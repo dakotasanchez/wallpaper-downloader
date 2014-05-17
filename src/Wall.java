@@ -30,6 +30,7 @@ public class Wall {
     private int page;
     private int imageCount;
     private int imageLimit;
+    private int errorCount;
 
 	// for xml elements
 	private Elements hashes;
@@ -42,6 +43,8 @@ public class Wall {
 	public Wall(String sub, String path, int imageLimit, ProgressBarUpdater pbu) {
 		this.path = path;
 		this.imageLimit = imageLimit;
+
+		errorCount = 0;
 		imageCount = 0;
         page = 0;
 
@@ -55,12 +58,11 @@ public class Wall {
 	public void updateXMLPage() {
 		Document doc;
 		try {
-			System.out.println(xmlUrl + page + ".xml");
-			// doc = Jsoup.connect(xmlUrl + page + ".xml").get();
 			HttpConnection c = (HttpConnection)Jsoup.connect(xmlUrl + page + ".xml");
 			// 10 second timeout
 			c.timeout(10000);
 			doc = c.get();
+			errorCount = 0;
 
 			// get elements for the following tags
 			hashes = doc.select("hash");
@@ -69,7 +71,12 @@ public class Wall {
 			heights = doc.select("height");
 
 		} catch (Exception e) {
-			showError("Error retrieving page", e);
+			errorCount++;
+			if (errorCount >= 3) {
+				showError("Error retrieving page", e);
+				System.exit(0);
+			}
+			updateXMLPage();
 		}
 	}
 
