@@ -1,3 +1,10 @@
+/* 	
+*	Dakota sanchez
+*	26 April 2014
+*	
+*	Imgur wallpaper mass downloader 
+*/
+
 import javax.swing.JProgressBar;
 
 public class ProgressBarUpdater implements Runnable {
