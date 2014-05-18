@@ -41,9 +41,10 @@ public class Main {
 		if(imageLimit == null) { System.exit(0); }
 
 		// popular imgur sections for wallpapers, get user choice
-		String[] subs = {"earth", "space", "sky", "animal", "city",
-						 "winter", "history", "food", "culinary", "architecture",
-						 "macro", "exposure", "car", "future", "art",
+		String[] subs = {"earth", "space", "sky", "city", "animal",
+						 "winter", "history", "food", "culinary", 
+						 "car", "architecture", "sports", "future",
+						 "macro", "exposure", "destruction", "art",
 						 "fractal", "map", "village", "adrenaline" };
 		String sub = (String)JOptionPane.showInputDialog(
 							null,
