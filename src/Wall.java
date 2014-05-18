@@ -27,47 +27,46 @@ public class Wall {
     private final String imgur_extension = "new/day/page/";
 
 	private String xmlUrl;
-	private String path;
-    private int page;
+	private String path; // path to download to
+    private int page; // current url page
     private int imageCount;
     private int imageLimit;
-    private int pageErrorCount;
-    private int imageErrorCount;
+    private int pageErrorCount; // keep track of exception count retrieving xml
 
-	// for xml elements
+	// for xml elements, to extract image urls
 	private Elements hashes;
 	private Elements exts;
 	private Elements widths;
 	private Elements heights;
 
+	// update gui progress bar at intervals
 	private static ProgressBarUpdater pbu;
 
 	public Wall(String sub, String path, int imageLimit, ProgressBarUpdater pbu) {
 		this.path = path;
 		this.imageLimit = imageLimit;
+		this.pbu = pbu;
 
-		imageErrorCount = 0;
 		pageErrorCount = 0;
 		imageCount = 0;
         page = 0;
 
-        this.pbu = pbu;
 		xmlUrl = imgur_url + sub + imgur_extension;
 
+		// retrieve first xml and start downloading
 		updateXMLPage();
 		getImages();
 	}
 
 	public void updateXMLPage() {
-		Document doc;
 		try {
 			HttpConnection c = (HttpConnection)Jsoup.connect(xmlUrl + page + ".xml");
-			// 10 second timeout
-			c.timeout(10000);
-			doc = c.get();
-			pageErrorCount = 0;
+			c.timeout(10000); // 10 second timeout
+			Document doc = c.get();
 
-			// get elements for the following tags
+			pageErrorCount = 0; // reset error count after successful connection
+
+			// get elements for the following xml tags
 			hashes = doc.select("hash");
 			exts = doc.select("ext");
 			widths = doc.select("width");
@@ -75,8 +74,10 @@ public class Wall {
 
 		} catch (Exception e) {
 			pageErrorCount++;
+
+			// after 3 failures, show error and exit
 			if (pageErrorCount >= 3) {
-				showError("Error retrieving page", e);
+				showError("Slow connection, try again later", e);
 			}
 			updateXMLPage();
 		}
@@ -91,49 +92,46 @@ public class Wall {
 					int height = Integer.parseInt(heights.get(i).ownText());
 
 					// only download images that meet the min. resolution
-					if((width >= 1920) || (height >= 1080)) {
-						// 7-char hash associated with image
-						String hash = hashes.get(i).ownText();
-						// file extension
-						String ext = exts.get(i).ownText();
-						// url image is located at
-						URL url = new URL(imgur_url + hash + ext);
+					if((width >= 1280) || (height >= 720)) {
 
-						// download image and convert for save
-						Image image;
-						try {
-							image = ImageIO.read(url);
-							// reset error count
-							imageErrorCount = 0;
-						} catch (IIOException e1) {
-							imageErrorCount++;
-							if (imageErrorCount >= 3) {
-								showError("Error retrieving images", e1);
-							}
-							continue;
-						}
+						String hash = hashes.get(i).ownText(); // 7-char hash associated with image
 
+						String ext = exts.get(i).ownText(); // file extension
+
+						URL url = new URL(imgur_url + hash + ext); // url image is located at
+
+						Image image = ImageIO.read(url); // download image and convert for save
 						BufferedImage img = toBufferedImage(image);
-						// create output file and write image
-						File outputfile = new File(path + hash + ext);
+
+						File outputfile = new File(path + hash + ext); // create output file and write image
+						
 						// don't overwrite if it already exists
 						if(!outputfile.exists()) {
 							ImageIO.write(img, ext.substring(1), outputfile);
 							imageCount++;
+
+							// update progress bar with correct increment
 							Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
 							pbu.setValue(barValue);
 						}
+
 					}
+					// exit once image limit is reached
 					if (imageCount >= imageLimit) {
-						Thread.sleep(500);
+						Thread.sleep(500); // let gui thread update
 						System.exit(0);
 					}						
 				}
+				// reached end of element list, so retrieve next xml page
 				page++;
 				updateXMLPage();
 			}
-		} catch (Exception e2) {
-			e2.printStackTrace();
+		} catch (Exception e) {
+			// IIOException when reading is usually related to server stress
+			if(e instanceof IIOException)
+				showError("Slow connection, try again later", e);
+			else
+				showError("Error retrieving images", e);
 		}
 	}
 
@@ -153,6 +151,7 @@ public class Wall {
 	    return bimage;
 	}
 
+	// show error message dialog and exit
 	public void showError(String message, Exception e) {
 		JOptionPane.showMessageDialog(
 				null,

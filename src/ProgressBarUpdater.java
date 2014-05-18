@@ -23,12 +23,13 @@ public class ProgressBarUpdater implements Runnable {
 	public void run() {
 		do {
 			if(value != null) {
+				// increment progress bar
 				jpb.setValue((int)Math.round(Math.floor(value.intValue())));
 			}
 			try {
 				Thread.sleep(100L);
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		} while (value == null || value.intValue() <= jpb.getMaximum());
 	}

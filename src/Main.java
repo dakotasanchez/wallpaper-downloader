@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+// series of dialogs for user input
 public class Main {
 
 	private static ProgressBarUpdater pbu;
@@ -24,6 +25,7 @@ public class Main {
 	public static void main(String[] args) {
 		setLAF();
 
+		// get number of images to download from user
 		Integer[] limits = new Integer[200];
 		for(int i = 0; i < limits.length; i++) { limits[i] = i + 1; }
 		Integer imageLimit = (Integer)JOptionPane.showInputDialog(
@@ -35,12 +37,14 @@ public class Main {
 								limits,
 								"1");
 		
+		// if none selected then exit
 		if(imageLimit == null) { System.exit(0); }
 
-		// popular subreddits for wallpapers
-		String[] subs = {"space", "earth", "sky", "animal", "winter",
-						 "city", "history", "food", "map", "adrenaline",
-						 "destruction", "village" };
+		// popular imgur sections for wallpapers, get user choice
+		String[] subs = {"earth", "space", "sky", "animal", "city",
+						 "winter", "history", "food", "culinary", "architecture",
+						 "macro", "exposure", "car", "future", "art",
+						 "fractal", "map", "village", "adrenaline" };
 		String sub = (String)JOptionPane.showInputDialog(
 							null,
 							"Choose desired image category:",
@@ -53,7 +57,7 @@ public class Main {
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
 
-		// create directory chooser for download
+		// create directory chooser for download path
 		JFileChooser fc = new JFileChooser();
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		fc.setDialogTitle("Please choose a directory for download");
@@ -76,7 +80,7 @@ public class Main {
 				path += "/";
 		}
 
-		// set up progress bar and offload to thread
+		// set up window frame
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setSize(400, 80);
@@ -84,19 +88,22 @@ public class Main {
 		frame.setResizable(false);
 		frame.setContentPane(new JPanel());
 
+		// grammar
 		String labelStr = "Getting " + imageLimit + " newest ";
 		if(imageLimit == 1) 
 			labelStr += "image ";
 		else
 			labelStr += "images ";
-
 		labelStr += "from " + sub + " wallpaper source";
 
+		// add info text to panel
 		frame.getContentPane().add(new JLabel(labelStr));
 		
+		// add progress bar to panel
 		pb = new JProgressBar();
 		frame.getContentPane().add(pb);
 
+		// create new updater and offload to thread
 		pbu = new ProgressBarUpdater(pb);
 		new Thread(pbu).start();
 
@@ -109,7 +116,7 @@ public class Main {
 		new Wall(sub, path, imageLimit, pbu);
 	}
 
-	// change Look & Feel of user interface
+	// change Look & Feel of user interface to nimbus
 	public static void setLAF() {
 		try{
 			for(LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
