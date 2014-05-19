@@ -1,4 +1,4 @@
-wallpaper-downloader
+wallpapers
 ====================
 
 Imgur wallpaper mass downloader
