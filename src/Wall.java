@@ -9,6 +9,7 @@ import java.net.URL;
 import java.io.File;
 import javax.imageio.ImageIO;
 import javax.imageio.IIOException;
+import java.awt.color.CMMException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.HttpConnection;
@@ -32,6 +33,7 @@ public class Wall {
     private int imageCount;
     private int imageLimit;
     private int pageErrorCount; // keep track of exception count retrieving xml
+	private int savedi;
 
 	// for xml elements, to extract image urls
 	private Elements hashes;
@@ -50,6 +52,7 @@ public class Wall {
 		pageErrorCount = 0;
 		imageCount = 0;
         page = 0;
+		savedi = 0;
 
 		xmlUrl = imgur_url + sub + imgur_extension;
 
@@ -87,7 +90,7 @@ public class Wall {
 		try {
 			while(imageCount < imageLimit) {
 				// for every image referenced in the XML
-				for(int i = 0; i < hashes.size(); i++) {
+				for(int i = savedi; i < hashes.size(); i++) {
 					int width = Integer.parseInt(widths.get(i).ownText());
 					int height = Integer.parseInt(heights.get(i).ownText());
 
@@ -120,18 +123,25 @@ public class Wall {
 					if (imageCount >= imageLimit) {
 						Thread.sleep(500); // let gui thread update
 						System.exit(0);
-					}						
+					}
+					savedi++;					
 				}
+				savedi = 0;
 				// reached end of element list, so retrieve next xml page
 				page++;
 				updateXMLPage();
 			}
 		} catch (Exception e) {
 			// IIOException when reading is usually related to server stress
-			if(e instanceof IIOException)
+			if(e instanceof IIOException) {
 				showError("Slow connection, try again later", e);
-			else
+			} else if(e instanceof CMMException) {
+				e.printStackTrace();
+				savedi++; // skip corrupted image
+				getImages();
+			} else {
 				showError("Error retrieving images", e);
+			}
 		}
 	}
 
