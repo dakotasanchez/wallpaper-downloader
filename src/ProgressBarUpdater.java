@@ -10,6 +10,7 @@ import javax.swing.JProgressBar;
 public class ProgressBarUpdater implements Runnable {
 	private JProgressBar jpb = null;
 	private Integer value = null;
+	private boolean exit = false;
 
 	public ProgressBarUpdater (JProgressBar jpb) {
 		this.jpb = jpb;
@@ -18,6 +19,10 @@ public class ProgressBarUpdater implements Runnable {
 
 	public void setValue(Integer value) {
 		this.value = value;
+	}
+
+	public void exit() {
+		exit = true;
 	}
 
 	public void run() {
@@ -31,6 +36,7 @@ public class ProgressBarUpdater implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if(exit) break;
 		} while (value == null || value.intValue() <= jpb.getMaximum());
 	}
 }

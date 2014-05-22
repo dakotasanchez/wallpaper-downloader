@@ -15,6 +15,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+
 // series of dialogs for user input
 public class Main {
 
@@ -115,6 +119,18 @@ public class Main {
 
 		// start downloading
 		new Wall(sub, path, imageLimit, pbu);
+
+		// close progress bar
+		frame.dispose();
+
+		try {
+			// open folder after completion
+			File downloadDest = new File(path);
+			Desktop desktop = Desktop.getDesktop();
+			desktop.open(downloadDest);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// change Look & Feel of user interface to nimbus

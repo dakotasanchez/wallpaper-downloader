@@ -122,9 +122,10 @@ public class Wall {
 					// exit once image limit is reached
 					if (imageCount >= imageLimit) {
 						Thread.sleep(500); // let gui thread update
-						System.exit(0);
+						pbu.exit(); // end progress bar thread
+						return;
 					}
-					savedi++;					
+					savedi++; // keep track of iterator for loop re-entry					
 				}
 				savedi = 0;
 				// reached end of element list, so retrieve next xml page
