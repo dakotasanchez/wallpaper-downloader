@@ -66,6 +66,8 @@ public class Main {
 		JFileChooser fc = new JFileChooser();
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		fc.setDialogTitle("Please choose a directory for download");
+		fc.setApproveButtonText("Choose");
+		fc.setCurrentDirectory(new File(System.getProperty("user.home")));
 		int returnVal = fc.showOpenDialog(null);
 
 		// exit if no directory chosen
