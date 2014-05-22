@@ -15,6 +15,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class Main {
 								JOptionPane.PLAIN_MESSAGE,
 								null,
 								limits,
-								"1");
+								1);
 		
 		// if none selected then exit
 		if(imageLimit == null) { System.exit(0); }
@@ -90,10 +92,11 @@ public class Main {
 		// set up window frame
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 80);
+		frame.setSize(400, 100);
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
 		frame.setContentPane(new JPanel());
+        frame.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
 
 		// grammar
 		String labelStr = "Getting " + imageLimit + " newest ";
@@ -108,7 +111,8 @@ public class Main {
 		
 		// add progress bar to panel
 		pb = new JProgressBar();
-		frame.getContentPane().add(pb);
+		pb.setPreferredSize(new Dimension(300, 25));
+        frame.getContentPane().add(pb);
 
 		// create new updater and offload to thread
 		pbu = new ProgressBarUpdater(pb);
