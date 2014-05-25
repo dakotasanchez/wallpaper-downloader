@@ -77,7 +77,7 @@ public class Wall {
 
 		} catch (Exception e) {
 			pageErrorCount++;
-
+			System.out.println("pageErrorCount = " + pageErrorCount);
 			// after 3 failures, show error and exit
 			if (pageErrorCount >= 3) {
 				showError("Slow connection, try again later", e);
@@ -101,21 +101,23 @@ public class Wall {
 
 						String ext = exts.get(i).ownText(); // file extension
 
-						URL url = new URL(imgur_url + hash + ext); // url image is located at
+						File outputfile = new File(path + hash + ext); // create output file object
 
-						Image image = ImageIO.read(url); // download image and convert for save
-						BufferedImage img = toBufferedImage(image);
-
-						File outputfile = new File(path + hash + ext); // create output file and write image
-						
 						// don't overwrite if it already exists
 						if(!outputfile.exists()) {
+							URL url = new URL(imgur_url + hash + ext); // url image is located at
+
+							Image image = ImageIO.read(url); // download image and convert for save
+							BufferedImage img = toBufferedImage(image);
+						
 							ImageIO.write(img, ext.substring(1), outputfile);
 							imageCount++;
 
 							// update progress bar with correct increment
 							Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
 							pbu.setValue(barValue);
+						} else {
+							System.out.println(path + hash + ext + " already exists");
 						}
 
 					}
@@ -150,6 +152,8 @@ public class Wall {
 	    if (img instanceof BufferedImage) {
 	        return (BufferedImage) img;
 	    }
+
+        System.out.println("Converting img to BufferedImage");
 	    // create a buffered image with transparency
 	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
