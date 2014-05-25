@@ -7,9 +7,10 @@
 
 import java.net.URL;
 import java.io.File;
-import javax.imageio.ImageIO;
-import javax.imageio.IIOException;
-import java.awt.color.CMMException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.jsoup.Jsoup;
 import org.jsoup.helper.HttpConnection;
@@ -33,7 +34,6 @@ public class Wall {
     private int imageCount;
     private int imageLimit;
     private int pageErrorCount; // keep track of exception count retrieving xml
-	private int savedi;
 
 	// for xml elements, to extract image urls
 	private Elements hashes;
@@ -52,7 +52,6 @@ public class Wall {
 		pageErrorCount = 0;
 		imageCount = 0;
         page = 0;
-		savedi = 0;
 
 		xmlUrl = imgur_url + sub + imgur_extension;
 
@@ -90,7 +89,7 @@ public class Wall {
 		try {
 			while(imageCount < imageLimit) {
 				// for every image referenced in the XML
-				for(int i = savedi; i < hashes.size(); i++) {
+				for(int i = 0; i < hashes.size(); i++) {
 					int width = Integer.parseInt(widths.get(i).ownText());
 					int height = Integer.parseInt(heights.get(i).ownText());
 
@@ -107,49 +106,43 @@ public class Wall {
 						if(!outputfile.exists()) {
 							URL url = new URL(imgur_url + hash + ext); // url image is located at
 
-							Image image = ImageIO.read(url); // download image and convert for save
+							InputStream is = url.openStream();
+							OutputStream os = new FileOutputStream(outputfile);
 
-							if(image instanceof BufferedImage) { // only save BufferedImages
-								BufferedImage img = (BufferedImage)image;
-								ImageIO.write(img, ext.substring(1), outputfile);
-								imageCount++;
+							byte[] b = new byte[2048];
+							int length;
 
-								// update progress bar with correct increment
-								Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
-								pbu.setValue(barValue);
-							} else {
-								System.out.println(hash + ext + " is not BufferedImage");
+							// read file into buffer and write to file
+							while((length = is.read(b)) != -1) {
+								os.write(b, 0, length);
 							}
+
+							is.close();
+							os.close();
+
+							imageCount++; // increment download counter
+
+							// update progress bar with correct increment
+							Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
+							pbu.setValue(barValue);
 						
 						} else {
 							System.out.println(path + hash + ext + " already exists");
 						}
-
 					}
 					// exit once image limit is reached
 					if (imageCount >= imageLimit) {
 						Thread.sleep(500); // let gui thread update
 						pbu.exit(); // end progress bar thread
 						return;
-					}
-					savedi++; // keep track of iterator for loop re-entry					
+					}				
 				}
-				savedi = 0;
 				// reached end of element list, so retrieve next xml page
 				page++;
 				updateXMLPage();
 			}
 		} catch (Exception e) {
-			// IIOException when reading is usually related to server stress
-			if(e instanceof IIOException) {
-				showError("Slow connection, try again later", e);
-			} else if(e instanceof CMMException) {
-				e.printStackTrace();
-				savedi++; // skip corrupted image
-				getImages();
-			} else {
-				showError("Error retrieving images", e);
-			}
+			showError("Error retrieving images (possible slow connection)", e);
 		}
 	}
 
@@ -161,6 +154,6 @@ public class Wall {
 				"Error",
 				JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
-			System.exit(0);
+			System.exit(1);
 	}
 }
