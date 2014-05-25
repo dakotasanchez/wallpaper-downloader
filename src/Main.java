@@ -32,7 +32,7 @@ public class Main {
 		setLAF();
 
 		// get number of images to download from user
-		Integer[] limits = new Integer[200];
+		Integer[] limits = new Integer[300];
 		for(int i = 0; i < limits.length; i++) { limits[i] = i + 1; }
 		Integer imageLimit = (Integer)JOptionPane.showInputDialog(
 								null,
@@ -59,7 +59,7 @@ public class Main {
 							JOptionPane.PLAIN_MESSAGE,
 							null,
 							subs,
-							"space");
+							"earth");
 
 		// if none selected then exit
 		if(sub == null) { System.exit(0); }
