@@ -108,14 +108,19 @@ public class Wall {
 							URL url = new URL(imgur_url + hash + ext); // url image is located at
 
 							Image image = ImageIO.read(url); // download image and convert for save
-							BufferedImage img = toBufferedImage(image);
-						
-							ImageIO.write(img, ext.substring(1), outputfile);
-							imageCount++;
 
-							// update progress bar with correct increment
-							Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
-							pbu.setValue(barValue);
+							if(image instanceof BufferedImage) { // only save BufferedImages
+								BufferedImage img = (BufferedImage)image;
+								ImageIO.write(img, ext.substring(1), outputfile);
+								imageCount++;
+
+								// update progress bar with correct increment
+								Integer barValue = (int) (((imageCount * 1.0) / imageLimit) * 100);
+								pbu.setValue(barValue);
+							} else {
+								System.out.println(hash + ext + " is not BufferedImage");
+							}
+						
 						} else {
 							System.out.println(path + hash + ext + " already exists");
 						}
@@ -146,24 +151,6 @@ public class Wall {
 				showError("Error retrieving images", e);
 			}
 		}
-	}
-
-	public static BufferedImage toBufferedImage(Image img) {
-	    if (img instanceof BufferedImage) {
-	        return (BufferedImage) img;
-	    }
-
-        System.out.println("Converting img to BufferedImage");
-	    // create a buffered image with transparency
-	    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-	    // draw the image on to the buffered image
-	    Graphics2D bGr = bimage.createGraphics();
-	    bGr.drawImage(img, 0, 0, null);
-	    bGr.dispose();
-
-	    // return the buffered image
-	    return bimage;
 	}
 
 	// show error message dialog and exit
