@@ -19,7 +19,7 @@
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac includeantruntime="false" srcdir="${src}" destdir="${build}"
-        source="1.7" target="1.7">
+        source="1.6" target="1.6">
       <classpath>
         <pathelement location="${lib}/jsoup-1.7.3.jar"/>
       </classpath>
