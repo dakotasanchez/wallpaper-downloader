@@ -120,7 +120,7 @@ public class Main {
 
 		frame.setVisible(true);
 
-		// append for correct url
+		// append for correct url (e.g. /earthporn or /spaceporn)
 		sub = "r/" + sub + "porn/";
 
 		// start downloading
