@@ -6,7 +6,9 @@ Imgur wallpaper mass downloader
 Setup
 =====
 
-- Have java, javac, and ant installed and in your PATH
+- Have at least JDK 7 installed
+- Have ant installed
+- Have java, javac, and ant in your PATH
 
 Build
 ===============
