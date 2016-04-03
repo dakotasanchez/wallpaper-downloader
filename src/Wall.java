@@ -94,7 +94,7 @@ public class Wall {
 					int height = Integer.parseInt(heights.get(i).ownText());
 
 					// only download images that meet the min. resolution
-					if((width >= 1280) || (height >= 720)) {
+					if((width >= 1280) && (height >= 720)) {
 
 						String hash = hashes.get(i).ownText(); // 7-char hash associated with image
 
